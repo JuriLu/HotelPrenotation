@@ -1,4 +1,4 @@
-export const WA_NUMBER = '+355685354596'
+export const WA_NUMBER = '+355698626849'
 
 export const ROOMS = [
   {

@@ -146,7 +146,7 @@ function renderAbout() {
         </div>
       </div>
     `,
-    { className: 'py-24 px-6' },
+    { id: 'story', className: 'py-24 px-6' },
   )
 }
 
@@ -161,7 +161,7 @@ function renderRooms() {
             Each room is a world of its own. Inquire via WhatsApp to discover which one is waiting for you — and at what price.
           </p>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-7">
           ${ROOMS.map(
             (room) => `
               <article class="room-card group bg-card rounded-3xl overflow-hidden border border-amber-100 transition-shadow hover:shadow-[0_20px_48px_rgba(124,74,45,0.1)]">
@@ -200,7 +200,7 @@ function renderRooms() {
         </div>
       </div>
     `,
-    { className: 'py-24 px-6', style: 'background: rgba(124,74,45,0.04)' },
+    { id: 'rooms', className: 'py-24 px-6', style: 'background: rgba(124,74,45,0.04)' },
   )
 }
 
@@ -210,7 +210,7 @@ function renderAmenities() {
       <div class="max-w-5xl mx-auto">
         <div class="text-center mb-14">
           ${label('The Experience')}
-          <h2 class="font-display text-4xl font-bold text-amber-950">Why Maison Élite</h2>
+          <h2 class="font-display text-4xl font-bold text-amber-950">Why Lidia Apartments Sarande</h2>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           ${AMENITIES.map(
@@ -227,7 +227,7 @@ function renderAmenities() {
         </div>
       </div>
     `,
-    { className: 'py-24 px-6' },
+    { id: 'amenities', className: 'py-24 px-6' },
   )
 }
 
@@ -258,7 +258,7 @@ function renderTestimonials() {
         </div>
       </div>
     `,
-    { className: 'py-24 px-6', style: 'background: rgba(124,74,45,0.04)' },
+    { id: 'reviews', className: 'py-24 px-6', style: 'background: rgba(124,74,45,0.04)' },
   )
 }
 
@@ -324,10 +324,16 @@ function renderFooter() {
           </div>
           <div>
             <p class="text-amber-200/75 font-semibold text-sm mb-4">Navigate</p>
-            ${['Our Story', 'Rooms & Suites', 'Amenities', 'Guest Reviews', 'Request a Stay']
+            ${[
+              { label: 'Our Story', href: '#story' },
+              { label: 'Rooms & Suites', href: '#rooms' },
+              { label: 'Amenities', href: '#amenities' },
+              { label: 'Guest Reviews', href: '#reviews' },
+              { label: 'Request a Stay', href: '#reserve' },
+            ]
               .map(
-                (item) =>
-                  `<p class="text-amber-500/80 text-sm py-1 hover:text-amber-300 cursor-pointer transition-colors">${item}</p>`,
+                ({ label, href }) =>
+                  `<a href="${href}" class="text-amber-500/80 text-sm py-1 hover:text-amber-300 cursor-pointer transition-colors block">${label}</a>`,
               )
               .join('')}
           </div>

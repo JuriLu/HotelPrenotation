@@ -3,7 +3,6 @@ import { fmtDate, todayIso } from './utils.js'
 
 const defaultForm = {
   name: '',
-  phone: '',
   guests: 2,
   startDate: '',
   endDate: '',
@@ -26,7 +25,7 @@ function hasPreview() {
 }
 
 function previewMessage() {
-  return `"Hello, my name is <strong class="not-italic text-amber-950">${form.name}</strong> and i request a reservation for <strong class="not-italic text-amber-950">${form.guests}</strong> people for <strong class="not-italic text-amber-950">${fmtDate(form.startDate)}</strong> untill <strong class="not-italic text-amber-950">${fmtDate(form.endDate)}</strong>. Can you please show me the rooms available and the price please? thank you"`
+  return `"Hello, my name is <strong class="not-italic text-amber-950">${form.name}</strong> and I request a reservation for <strong class="not-italic text-amber-950">${form.guests}</strong> people for <strong class="not-italic text-amber-950">${fmtDate(form.startDate)}</strong> untill <strong class="not-italic text-amber-950">${fmtDate(form.endDate)}</strong>. Can you please show me the rooms available and the price please? Thank you!"`
 }
 
 function renderSuccess() {
@@ -55,15 +54,6 @@ function renderForm() {
           <input id="name" name="name" type="text" placeholder="Emma Thornton" value="${form.name}" class="${inputClass('name')}" />
         </div>
         ${errors.name ? `<p class="text-xs text-rose-500 mt-1">${errors.name}</p>` : ''}
-      </div>
-
-      <div>
-        <label for="phone" class="block text-xs font-semibold text-amber-700/65 uppercase tracking-wider mb-1.5">Phone Number</label>
-        <div class="relative">
-          <i data-lucide="phone" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500/60 pointer-events-none"></i>
-          <input id="phone" name="phone" type="tel" placeholder="+1 234 567 8900" value="${form.phone}" class="${inputClass('phone')}" />
-        </div>
-        ${errors.phone ? `<p class="text-xs text-rose-500 mt-1">${errors.phone}</p>` : ''}
       </div>
 
       <div>
@@ -125,7 +115,6 @@ export function renderReservationCard() {
 function validate() {
   const nextErrors = {}
   if (!form.name.trim()) nextErrors.name = 'Please enter your name.'
-  if (!form.phone.trim()) nextErrors.phone = 'Please enter your phone number.'
   if (!form.startDate) nextErrors.startDate = 'Select an arrival date.'
   if (!form.endDate) nextErrors.endDate = 'Select a departure date.'
   if (form.startDate && form.endDate && form.endDate <= form.startDate) {
@@ -174,7 +163,7 @@ function bindFormEvents(onIcons) {
       return
     }
 
-    const message = `Hello, my name is ${form.name} and i request a reservation for ${form.guests} people for ${fmtDate(form.startDate)} untill ${fmtDate(form.endDate)}. Can you please show me the rooms available and the price please? thank you`
+    const message = `Hello, my name is ${form.name} and i request a reservation for ${form.guests} people for ${fmtDate(form.startDate)} untill ${fmtDate(form.endDate)}. Can you please show me the rooms available and the price please? Thank you!`
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`, '_blank')
     submitted = true
     updateCard(onIcons)
@@ -185,7 +174,6 @@ function bindFormEvents(onIcons) {
     if (!(target instanceof HTMLInputElement)) return
 
     if (target.name === 'name') form.name = target.value
-    if (target.name === 'phone') form.phone = target.value
     if (target.name === 'startDate') {
       form.startDate = target.value
       const endDateInput = document.getElementById('endDate')

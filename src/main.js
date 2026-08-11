@@ -11,6 +11,7 @@ function refreshIcons() {
 }
 
 function initRevealAnimations() {
+  const isMobile = window.innerWidth < 640
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -20,7 +21,7 @@ function initRevealAnimations() {
         }
       })
     },
-    { threshold: 0.12, rootMargin: '-80px' },
+    { threshold: 0.12, rootMargin: isMobile ? '0px' : '-80px' },
   )
 
   document.querySelectorAll('.reveal').forEach((section) => observer.observe(section))
