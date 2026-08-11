@@ -1,5 +1,6 @@
 import { ROOMS, AMENITIES, TESTIMONIALS } from './data.js'
 import { stars } from './utils.js'
+import mainBg from './assets/Main_bg.png'
 
 function label(text) {
   return `<p class="section-label">${text}</p>`
@@ -30,7 +31,7 @@ function renderHero() {
     <section class="hero-section relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
       <div class="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1900&h=1100&fit=crop&auto=format"
+          src="${mainBg}"
           alt="Lidia Apartments Sarande"
           class="w-full h-full object-cover"
         />
@@ -43,19 +44,19 @@ function renderHero() {
         </div>
         <div>
           <p class="font-display font-bold text-white text-base leading-none">Lidia Apartments Sarande</p>
-          <p class="text-white/45 text-[10px] mt-0.5">Booking Apartments</p>
+          <p class="text-white/75 text-[10px] mt-0.5">Booking Apartments</p>
         </div>
       </div>
 
       <div class="relati    ve z-10 text-center px-6 max-w-3xl hero-content">
-        <p class="hero-kicker text-amber-200/65 text-xs tracking-[0.32em] uppercase font-semibold mb-5">
+        <p class="hero-kicker text-amber-600/100 text-xs tracking-[0.32em] uppercase font-semibold mb-5">
           Luxury Apartments · Albanian Riviera
         </p>
         <h1 class="font-display text-5xl md:text-[5.5rem] leading-[1.07] font-bold text-white mb-6">
           Where Every Stay<br />
           <em class="not-italic italic text-amber-300">Tells a Story</em>
         </h1>
-        <p class="text-amber-100/55 text-lg leading-relaxed max-w-xl mx-auto mb-10">
+        <p class="text-amber-200/100 text-lg leading-relaxed max-w-xl mx-auto mb-10">
           An intimate collection of rooms and suites designed to exceed every expectation, in surroundings built to inspire.
         </p>
         <a href="#reserve" class="hero-cta inline-flex items-center gap-2.5 px-8 py-4 bg-amber-700 hover:bg-amber-800 text-white rounded-2xl font-semibold text-sm shadow-2xl shadow-amber-950/40 transition-colors">
@@ -301,26 +302,24 @@ function renderFooter() {
                 <i data-lucide="building-2" class="w-5 h-5 text-amber-100"></i>
               </div>
               <div>
-                <p class="font-display font-bold text-amber-100 text-base leading-none">Maison Élite</p>
-                <p class="text-amber-600/45 text-[10px] mt-0.5">Hotels & Residences</p>
+                <p class="font-display font-bold text-amber-100 text-base leading-none">Lidia Apartments Sarande</p>
+                <p class="text-amber-500/80 text-[10px] mt-0.5">Luxury Apartments</p>
               </div>
             </div>
-            <p class="text-amber-400/52 text-sm leading-relaxed mb-5">
-              A boutique luxury collection on the French Riviera, curated for those who appreciate the extraordinary.
+            <p class="text-amber-500/80 text-sm leading-relaxed mb-5">
+              An apartments luxury collection on the Albanian Riviera, curated for those who appreciate the extraordinary.
             </p>
             <div class="flex gap-2.5">
-              <a href="#" aria-label="Instagram" class="w-9 h-9 rounded-full border border-amber-700/35 flex items-center justify-center text-amber-500/65 hover:text-amber-300 hover:border-amber-500 transition-all">
+              <a href="https://www.instagram.com/lidia.apartments.sarande" aria-label="Instagram" class="w-9 h-9 rounded-full border border-amber-700/35 flex items-center justify-center text-amber-500/65 hover:text-amber-300 hover:border-amber-500 transition-all">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
                   <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                   <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                   <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                 </svg>
               </a>
-              <a href="#" aria-label="Facebook" class="w-9 h-9 rounded-full border border-amber-700/35 flex items-center justify-center text-amber-500/65 hover:text-amber-300 hover:border-amber-500 transition-all">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                </svg>
-              </a>
+              <p class="text-amber-500/80 text-sm leading-relaxed mt-2">
+               Check our IG 
+              </p>
             </div>
           </div>
           <div>
@@ -328,7 +327,7 @@ function renderFooter() {
             ${['Our Story', 'Rooms & Suites', 'Amenities', 'Guest Reviews', 'Request a Stay']
               .map(
                 (item) =>
-                  `<p class="text-amber-500/52 text-sm py-1 hover:text-amber-300 cursor-pointer transition-colors">${item}</p>`,
+                  `<p class="text-amber-500/80 text-sm py-1 hover:text-amber-300 cursor-pointer transition-colors">${item}</p>`,
               )
               .join('')}
           </div>
@@ -336,15 +335,15 @@ function renderFooter() {
             <p class="text-amber-200/75 font-semibold text-sm mb-4">Contact</p>
             <div class="space-y-3">
               ${[
-                { icon: 'map-pin', text: "1 Promenade des Arts, Côte d'Azur, France" },
-                { icon: 'phone', text: '+33 4 93 00 00 00' },
-                { icon: 'mail', text: 'bonjour@maisonelite.com' },
+                { icon: 'map-pin', text: "Rruga Musa Demi 54, Saranda, Albania" },
+                { icon: 'phone', text: '+355 69 862 6849' },
+                { icon: 'mail', text: 'lidiahasani98@gmail.com' },
                 { icon: 'message-circle', text: 'WhatsApp Business' },
               ]
                 .map(
                   ({ icon, text }) => `
-                    <div class="flex items-start gap-2.5 text-amber-500/52 text-sm">
-                      <i data-lucide="${icon}" class="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-600/55"></i>
+                    <div class="flex items-start gap-2.5 text-amber-500/80 text-sm">
+                      <i data-lucide="${icon}" class="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-500/80"></i>
                       ${text}
                     </div>
                   `,
@@ -353,13 +352,13 @@ function renderFooter() {
             </div>
           </div>
         </div>
-        <div class="border-t border-amber-900/50 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-amber-700/38">
-          <p>© 2025 Maison Élite Hotels. All rights reserved.</p>
+        <div class="border-t border-amber-600/50 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-amber-500/70">
+          <p>© ${new Date().getFullYear()} Lidia Apartments Sarande. All rights reserved.</p>
           <div class="flex gap-4">
             ${['Privacy Policy', 'Terms', 'Cookies']
               .map(
                 (item) =>
-                  `<span class="hover:text-amber-500 cursor-pointer transition-colors">${item}</span>`,
+                  `<span class="hover:text-amber-200 cursor-pointer transition-colors">${item}</span>`,
               )
               .join('')}
           </div>
