@@ -1,0 +1,221 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-background: #f3e8d4;
+  --color-foreground: #1c0f08;
+  --color-card: #fefaf4;
+  --color-primary: #7c4a2d;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+}
+
+:root {
+  --background: #f3e8d4;
+  --foreground: #1c0f08;
+  --card: #fefaf4;
+  --primary: #7c4a2d;
+  --radius: 1rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
+}
+
+#app {
+  width: 100%;
+  min-height: 100svh;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.page {
+  background: var(--background);
+}
+
+.section-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgb(180 83 9 / 0.55);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.brand-badge {
+  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.reservation-card {
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  background: rgba(254, 250, 244, 0.9);
+  border: 1px solid rgba(196, 151, 90, 0.18);
+  box-shadow: 0 24px 64px rgba(124, 74, 45, 0.1);
+}
+
+.message-preview-box {
+  background: rgba(37, 211, 102, 0.07);
+  border: 1px solid rgba(37, 211, 102, 0.18);
+}
+
+.submit-button {
+  background: linear-gradient(135deg, #7c4a2d 0%, #a0622b 100%);
+}
+
+.submit-button:hover {
+  filter: brightness(1.05);
+}
+
+.about-image {
+  box-shadow: 0 32px 72px rgba(124, 74, 45, 0.15);
+}
+
+.rating-badge {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(254, 250, 244, 0.93);
+  border: 1px solid rgba(196, 151, 90, 0.22);
+  box-shadow: 0 12px 32px rgba(124, 74, 45, 0.1);
+}
+
+.room-card {
+  box-shadow: 0 2px 12px rgba(124, 74, 45, 0.06);
+}
+
+.room-card:hover .room-image {
+  transform: scale(1.06);
+}
+
+.room-image {
+  transform-origin: center;
+  transition: transform 700ms ease;
+}
+
+.testimonial-card {
+  box-shadow: 0 2px 12px rgba(124, 74, 45, 0.06);
+}
+
+.star-row [data-lucide='star'] {
+  width: 1rem;
+  height: 1rem;
+}
+
+.rating-badge .star-row [data-lucide='star'] {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.hero-content > * {
+  animation: fade-up 0.8s ease-out both;
+}
+
+.hero-kicker {
+  animation-delay: 0s;
+}
+
+.hero-content h1 {
+  animation-delay: 0.12s;
+}
+
+.hero-content > p {
+  animation-delay: 0.22s;
+}
+
+.hero-cta {
+  animation: fade-up 0.6s ease-out 0.34s both;
+}
+
+.scroll-nudge {
+  animation: bounce 1.8s ease-in-out infinite;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.65s ease-out,
+    transform 0.65s ease-out;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.success-state {
+  animation: scale-in 0.45s ease-out both;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 94, 60, 0.2) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(139, 94, 60, 0.2);
+  border-radius: 4px;
+}
+
+@media (max-width: 640px) {
+  .grid.grid-cols-2.gap-4 {
+    grid-template-columns: 1fr;
+  }
+}
