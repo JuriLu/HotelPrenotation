@@ -1,6 +1,7 @@
 import { ROOMS, AMENITIES, TESTIMONIALS } from './data.js'
 import { stars } from './utils.js'
-import mainBg from './assets/Main_bg.png'
+import mainBg from './assets/Main_bg.jpg'
+import mainLogo from './assets/main_logo.png'
 
 function label(text) {
   return `<p class="section-label">${text}</p>`
@@ -39,8 +40,8 @@ function renderHero() {
       </div>
 
       <div class="absolute top-7 left-8 flex items-center gap-2.5 z-10">
-        <div class="brand-badge w-9 h-9 rounded-xl flex items-center justify-center">
-          <i data-lucide="building-2" class="w-5 h-5 text-amber-100"></i>
+        <div class="brand-badge w-16 h-16 rounded-xl overflow-hidden flex items-center justify-center ring-1 ring-white/10">
+          <img src="${mainLogo}" alt="Lidia Apartments Sarande logo" class="w-full h-full object-cover" />
         </div>
         <div>
           <p class="font-display font-bold text-white text-base leading-none">Lidia Apartments Sarande</p>
@@ -298,8 +299,8 @@ function renderFooter() {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
           <div>
             <div class="flex items-center gap-2.5 mb-4">
-              <div class="w-9 h-9 rounded-xl bg-amber-700 flex items-center justify-center">
-                <i data-lucide="building-2" class="w-5 h-5 text-amber-100"></i>
+              <div class="w-12 h-12 rounded-full overflow-hidden bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+                <img src="${mainLogo}" alt="Lidia Apartments Sarande logo" class="w-full h-full object-contain p-1" />
               </div>
               <div>
                 <p class="font-display font-bold text-amber-100 text-base leading-none">Lidia Apartments Sarande</p>
