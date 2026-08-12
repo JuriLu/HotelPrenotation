@@ -1,18 +1,24 @@
-import { ROOMS, AMENITIES, TESTIMONIALS } from './data.js'
-import { stars } from './utils.js'
+import { ROOMS, AMENITIES, TESTIMONIALS } from './data.ts'
+import { stars } from './utils.ts'
 import mainBg from './assets/Main_bg.jpg'
 import mainLogo from './assets/main_logo.png'
 
-function label(text) {
+function label(text: string): string {
   return `<p class="section-label">${text}</p>`
 }
 
-function section(content, { id, className = '', style = '' } = {}) {
+interface SectionOptions {
+  readonly id?: string
+  readonly className?: string
+  readonly style?: string
+}
+
+function section(content: string, { id, className = '', style = '' }: SectionOptions = {}): string {
   const styleAttr = style ? ` style="${style}"` : ''
   return `<section${id ? ` id="${id}"` : ''} class="reveal ${className}"${styleAttr}>${content}</section>`
 }
 
-export function renderPage() {
+export function renderPage(): string {
   return `
     <div class="page overflow-x-hidden">
       ${renderHero()}
@@ -27,7 +33,7 @@ export function renderPage() {
   `
 }
 
-function renderHero() {
+function renderHero(): string {
   return `
     <section class="hero-section relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
       <div class="absolute inset-0">
@@ -49,7 +55,7 @@ function renderHero() {
         </div>
       </div>
 
-      <div class="relati    ve z-10 text-center px-6 max-w-3xl hero-content">
+      <div class="relative z-10 text-center px-6 max-w-3xl hero-content">
         <p class="hero-kicker text-amber-600/100 text-xs tracking-[0.32em] uppercase font-semibold mb-5">
           Luxury Apartments · Albanian Riviera
         </p>
@@ -75,7 +81,7 @@ function renderHero() {
   `
 }
 
-export function renderReservationSection() {
+export function renderReservationSection(): string {
   return section(
     `
       <div class="max-w-2xl mx-auto">
@@ -99,7 +105,7 @@ export function renderReservationSection() {
   )
 }
 
-function renderAbout() {
+function renderAbout(): string {
   return section(
     `
       <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-14 items-center">
@@ -151,7 +157,7 @@ function renderAbout() {
   )
 }
 
-function renderRooms() {
+function renderRooms(): string {
   return section(
     `
       <div class="max-w-6xl mx-auto">
@@ -205,7 +211,7 @@ function renderRooms() {
   )
 }
 
-function renderAmenities() {
+function renderAmenities(): string {
   return section(
     `
       <div class="max-w-5xl mx-auto">
@@ -232,7 +238,7 @@ function renderAmenities() {
   )
 }
 
-function renderTestimonials() {
+function renderTestimonials(): string {
   return section(
     `
       <div class="max-w-5xl mx-auto">
@@ -263,7 +269,7 @@ function renderTestimonials() {
   )
 }
 
-function renderCta() {
+function renderCta(): string {
   return section(
     `
       <div class="absolute inset-0">
@@ -292,7 +298,7 @@ function renderCta() {
   )
 }
 
-function renderFooter() {
+function renderFooter(): string {
   return `
     <footer class="px-6 pt-16 pb-8" style="background: #1C0F08">
       <div class="max-w-5xl mx-auto">
@@ -364,7 +370,7 @@ function renderFooter() {
           <div class="flex gap-4">
             ${['Privacy Policy', 'Terms', 'Cookies']
               .map(
-                (item) =>
+                (item: string) =>
                   `<span class="hover:text-amber-200 cursor-pointer transition-colors">${item}</span>`,
               )
               .join('')}

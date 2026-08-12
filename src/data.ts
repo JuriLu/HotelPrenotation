@@ -1,11 +1,19 @@
 const WA_COUNTRY_CODE = '355'
 const WA_LOCAL_SEGMENTS = ['69', '862', '6849']
 
-export function getWhatsAppNumber() {
+export function getWhatsAppNumber(): string {
   return `${WA_COUNTRY_CODE}${WA_LOCAL_SEGMENTS.join('')}`
 }
 
-export const ROOMS = [
+export interface Room {
+  readonly name: string
+  readonly type: string
+  readonly image: string
+  readonly tags: ReadonlyArray<string>
+  readonly guests: number
+}
+
+export const ROOMS: ReadonlyArray<Room> = [
   {
     name: 'Maison Suite Royale',
     type: 'Luxury Suite',
@@ -56,7 +64,13 @@ export const ROOMS = [
   },
 ]
 
-export const AMENITIES = [
+export interface Amenity {
+  readonly icon: string
+  readonly title: string
+  readonly desc: string
+}
+
+export const AMENITIES: ReadonlyArray<Amenity> = [
   {
     icon: 'waves',
     title: 'Infinity Pool & Spa',
@@ -79,7 +93,14 @@ export const AMENITIES = [
   },
 ]
 
-export const TESTIMONIALS = [
+export interface Testimonial {
+  readonly name: string
+  readonly country: string
+  readonly rating: number
+  readonly quote: string
+}
+
+export const TESTIMONIALS: ReadonlyArray<Testimonial> = [
   {
     name: 'Emma Thornton',
     country: 'United Kingdom',

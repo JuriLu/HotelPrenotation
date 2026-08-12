@@ -1,22 +1,36 @@
-import { getWhatsAppNumber } from './data.js'
-import { buildWhatsAppUrl, fmtDate, sanitizeHtml, sanitizeText, todayIso } from './utils.js'
+import { getWhatsAppNumber } from './data.ts'
+import { buildWhatsAppUrl, fmtDate, sanitizeHtml, sanitizeText, todayIso } from './utils.ts'
 
-const defaultForm = {
+export interface ReservationForm {
+  readonly name: string
+  readonly guests: number
+  readonly startDate: string
+  readonly endDate: string
+}
+
+export type ReservationField = keyof ReservationForm
+export type ReservationErrors = Partial<Record<ReservationField, string>>
+export type IconRenderer = () => void
+type MutableReservationForm = { -readonly [Key in keyof ReservationForm]: ReservationForm[Key] } //* 1. Explain this
+
+export const DEFAULT_RESERVATION_FORM: ReservationForm = {
   name: '',
   guests: 2,
   startDate: '',
   endDate: '',
 }
 
-let form = { ...defaultForm }
-let errors = {}
-let submitted = false
-let datePickerOpen = false
-let datePickerClosing = false
-let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-let closeCalendarTimer
+let form: MutableReservationForm = { ...DEFAULT_RESERVATION_FORM };
+let errors: ReservationErrors = {};
+let submitted = false;
+let datePickerOpen = false;
+let datePickerClosing = false;
+let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let closeCalendarTimer: ReturnType<typeof setTimeout> | undefined;
+const namePattern = /^[\p{L} ]+$/u;
 
-function inputClass(key) {
+
+function inputClass(key: ReservationField): string { //* 2. Is this to add the error class to the input field if there is an error for the field?
   const base =
     'w-full pl-10 pr-4 py-3 rounded-xl border text-sm text-amber-950 bg-white/70 focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition-all placeholder:text-amber-400/60'
   return errors[key]
@@ -24,9 +38,8 @@ function inputClass(key) {
     : `${base} border-amber-200 focus:border-amber-400`
 }
 
-const namePattern = /^[\p{L} ]+$/u
 
-function nameError(value) {
+export function getNameError(value: string): string {
   switch (true) {
     case !value.trim():
       return 'Please enter your name.'
@@ -39,31 +52,35 @@ function nameError(value) {
   }
 }
 
-function getValidationErrors() {
-  const nextErrors = {}
-  const nextNameError = nameError(form.name)
+export function getReservationValidationErrors(reservation: ReservationForm): ReservationErrors {
+  const nextErrors: ReservationErrors = {}
+  const nextNameError = getNameError(reservation.name)
   if (nextNameError) nextErrors.name = nextNameError
-  if (!form.startDate) nextErrors.startDate = 'Select an arrival date.'
-  if (!form.endDate) nextErrors.endDate = 'Select a departure date.'
-  if (form.startDate && form.endDate && form.endDate < form.startDate) {
+  if (!reservation.startDate) nextErrors.startDate = 'Select an arrival date.'
+  if (!reservation.endDate) nextErrors.endDate = 'Select a departure date.'
+  if (reservation.startDate && reservation.endDate && reservation.endDate < reservation.startDate) {
     nextErrors.endDate = 'Departure cannot be before arrival.'
   }
   return nextErrors
 }
 
-function isFormValid() {
-  return Object.keys(getValidationErrors()).length === 0
+export function isReservationValid(reservation: ReservationForm): boolean {
+  return Object.keys(getReservationValidationErrors(reservation)).length === 0
 }
 
-function hasPreview() {
+function isFormValid(): boolean {
+  return isReservationValid(form)
+}
+
+function hasPreview(): boolean {
   return isFormValid()
 }
 
-function reservationMessage() {
+function reservationMessage(): string { //*3. Can be used as an const which is an arrow function that return a string and can be put to utils. Or may not be put to utils , but can be used as a private property
   return `Hello, my name is ${sanitizeText(form.name)} and I would like to request a reservation for ${form.guests} ${form.guests > 1 ? 'people' : 'person'} from ${fmtDate(form.startDate)} to ${fmtDate(form.endDate)}. Could you please show me the available rooms and pricing? Thank you!`
 }
 
-function previewMessage() {
+function previewMessage(): string { //*v4. Same as reservationMessage but with html tags for styling the name, guests, startDate and endDate
   const nameHtml = `<strong class="not-italic text-amber-950">${sanitizeText(form.name)}</strong>`
   const guestsHtml = `<strong class="not-italic text-amber-950">${String(form.guests)}</strong>`
   const startHtml = `<strong class="not-italic text-amber-950">${fmtDate(form.startDate)}</strong>`
@@ -71,15 +88,15 @@ function previewMessage() {
   return `"Hello, my name is ${nameHtml} and I would like to request a reservation for ${guestsHtml} ${form.guests > 1 ? 'people' : 'person'} from ${startHtml} to ${endHtml}. Could you please show me the available rooms and pricing? Thank you!"`
 }
 
-function isoFromParts(year, month, day) {
+function isoFromParts(year: number, month: number, day: number): string {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
-function calendarTitle() {
+function calendarTitle(): string {
   return calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 }
 
-function renderCalendar() {
+function renderCalendar(): string {
   const year = calendarMonth.getFullYear()
   const month = calendarMonth.getMonth()
   const firstDay = new Date(year, month, 1).getDay()
@@ -109,7 +126,7 @@ function renderCalendar() {
   `
 }
 
-function renderSuccess() {
+function renderSuccess(): string {
   return `
     <div class="text-center py-8 success-state">
       <div class="w-20 h-20 rounded-full bg-[#25D366]/10 border-4 border-[#25D366]/25 flex items-center justify-center mx-auto mb-6">
@@ -125,8 +142,7 @@ function renderSuccess() {
   `
 }
 
-function renderForm() {
-  const canSubmit = isFormValid()
+function renderForm(): string {
   const dateRangeLabel =
     form.startDate && form.endDate
       ? `${fmtDate(form.startDate)} — ${fmtDate(form.endDate)}`
@@ -191,38 +207,17 @@ function renderForm() {
   `
 }
 
-export function renderReservationCard() {
+export function renderReservationCard(): string {
   return submitted ? renderSuccess() : renderForm()
 }
 
-function validate() {
-  const nextErrors = {}
-
-  switch (true) {
-    case !form.name.trim():
-      nextErrors.name = 'Please enter your name.'
-      break
-    case !namePattern.test(form.name):
-      nextErrors.name = 'Name can only contain letters and spaces.'
-      break
-    case form.name.length > 12:
-      nextErrors.name = 'Name must be 12 characters or fewer.'
-      break
-    default:
-      break
-  }
-
-  if (!form.startDate) nextErrors.startDate = 'Select an arrival date.'
-  if (!form.endDate) nextErrors.endDate = 'Select a departure date.'
-  if (form.startDate && form.endDate && form.endDate < form.startDate) {
-    nextErrors.endDate = 'Departure cannot be before arrival.'
-  }
-
+function validate(): boolean {
+  const nextErrors = getReservationValidationErrors(form)
   errors = nextErrors
   return Object.keys(nextErrors).length === 0
 }
 
-function updateCard(onIcons) {
+function updateCard(onIcons: IconRenderer): void {
   const card = document.getElementById('reservation-card')
   if (!card) return
   card.innerHTML = renderReservationCard()
@@ -231,7 +226,7 @@ function updateCard(onIcons) {
   updateSubmitState()
 }
 
-function updatePreview() {
+function updatePreview(): void {
   const preview = document.getElementById('message-preview')
   const previewText = document.getElementById('message-preview-text') || preview?.querySelector('p:last-child')
   if (!preview || !previewText) return
@@ -244,7 +239,7 @@ function updatePreview() {
   }
 }
 
-function updateSubmitState() {
+function updateSubmitState(): void {
   const submitButton = document.querySelector('.submit-button')
   if (submitButton instanceof HTMLButtonElement) {
     const invalid = !isFormValid()
@@ -254,8 +249,8 @@ function updateSubmitState() {
   }
 }
 
-function updateNameState(input) {
-  const nextNameError = nameError(form.name)
+function updateNameState(input: HTMLInputElement): void {
+  const nextNameError = getNameError(form.name)
   if (nextNameError) {
     errors.name = nextNameError
   } else {
@@ -272,12 +267,12 @@ function updateNameState(input) {
   }
 }
 
-function bindFormEvents(onIcons) {
+function bindFormEvents(onIcons: IconRenderer): void {
   const reservationForm = document.getElementById('reservation-form')
   const resetButton = document.getElementById('reset-form')
 
   resetButton?.addEventListener('click', () => {
-    form = { ...defaultForm }
+    form = { ...DEFAULT_RESERVATION_FORM }
     errors = {}
     submitted = false
     updateCard(onIcons)
@@ -341,8 +336,9 @@ function bindFormEvents(onIcons) {
     calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1)
     updateCard(onIcons)
   })
-  document.querySelectorAll('[data-date]').forEach((button) => button.addEventListener('click', () => {
-    const value = button.dataset.date
+  document.querySelectorAll<HTMLButtonElement>('[data-date]').forEach((button) => button.addEventListener('click', () => {
+    const value = button.dataset['date']
+    if (!value) return
     if (!form.startDate || (form.startDate && form.endDate)) {
       form.startDate = value; form.endDate = ''; errors = {}
       updateCard(onIcons)
@@ -380,7 +376,7 @@ function bindFormEvents(onIcons) {
   })
 }
 
-export function initReservationForm(onIcons) {
+export function initReservationForm(onIcons: IconRenderer): void {
   updateCard(onIcons)
   updateSubmitState()
 }
