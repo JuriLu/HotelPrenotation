@@ -27,10 +27,16 @@ function inputClass(key) {
 const namePattern = /^[\p{L} ]+$/u
 
 function nameError(value) {
-  if (!value.trim()) return 'Please enter your name.'
-  if (value.length > 12) return 'Name must be 12 characters or fewer.'
-  if (!namePattern.test(value)) return 'Name can only contain letters and spaces.'
-  return ''
+  switch (true) {
+    case !value.trim():
+      return 'Please enter your name.'
+    case value.length > 12:
+      return 'Name must be 12 characters or fewer.'
+    case !namePattern.test(value):
+      return 'Name can only contain letters and spaces.'
+    default:
+      return ''
+  }
 }
 
 function getValidationErrors() {
@@ -58,7 +64,11 @@ function reservationMessage() {
 }
 
 function previewMessage() {
-  return `"${reservationMessage()}"`
+  const nameHtml = `<strong class="not-italic text-amber-950">${sanitizeText(form.name)}</strong>`
+  const guestsHtml = `<strong class="not-italic text-amber-950">${String(form.guests)}</strong>`
+  const startHtml = `<strong class="not-italic text-amber-950">${fmtDate(form.startDate)}</strong>`
+  const endHtml = `<strong class="not-italic text-amber-950">${fmtDate(form.endDate)}</strong>`
+  return `"Hello, my name is ${nameHtml} and I would like to request a reservation for ${guestsHtml} ${form.guests > 1 ? 'people' : 'person'} from ${startHtml} to ${endHtml}. Could you please show me the available rooms and pricing? Thank you!"`
 }
 
 function isoFromParts(year, month, day) {
@@ -128,7 +138,7 @@ function renderForm() {
         <label for="name" class="block text-xs font-semibold text-amber-700/65 uppercase tracking-wider mb-1.5">Full Name</label>
         <div class="relative">
           <i data-lucide="user" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500/60 pointer-events-none"></i>
-          <input id="name" name="name" type="text" placeholder="Emma Thornton" value="${form.name}" autocomplete="name" inputmode="text" aria-invalid="${errors.name ? 'true' : 'false'}" aria-describedby="name-error" class="${inputClass('name')}" />
+          <input id="name" name="name" type="text" placeholder="Emma Thornton" value="${sanitizeText(form.name)}" autocomplete="name" inputmode="text" aria-invalid="${errors.name ? 'true' : 'false'}" aria-describedby="name-error" class="${inputClass('name')}" />
         </div>
         <p id="name-error" class="text-xs text-rose-500 mt-1${errors.name ? '' : ' hidden'}">${errors.name || ''}</p>
       </div>
@@ -150,7 +160,7 @@ function renderForm() {
         <div class="relative">
           <button type="button" id="date-range-toggle" aria-haspopup="dialog" aria-expanded="${datePickerOpen}" class="w-full text-left ${inputClass('startDate')} flex items-center gap-2 date-range-toggle">
             <i data-lucide="calendar-days" class="w-4 h-4 text-amber-500/60"></i>
-            <span class="flex-1 text-sm text-amber-950">${dateRangeLabel}</span>
+            <span class="flex-1 text-sm text-amber-950">${sanitizeText(dateRangeLabel)}</span>
             <span class="text-amber-500 text-xs uppercase tracking-[0.16em]">Choose</span>
           </button>
 
@@ -165,11 +175,11 @@ function renderForm() {
           <p class="text-[10px] font-semibold text-[#1a9e4e]/65 uppercase tracking-wider mb-2 flex items-center gap-1.5">
             <i data-lucide="message-circle" class="w-3 h-3"></i> Message Preview
           </p>
-          <p class="text-sm text-amber-900/75 leading-relaxed italic">${previewMessage()}</p>
+          <p class="text-sm text-amber-900/75 leading-relaxed italic" id="message-preview-text">${sanitizeHtml(previewMessage())}</p>
         </div>
       </div>
 
-      <button type="submit" class="w-full py-4 flex items-center justify-center gap-3 rounded-2xl font-semibold text-sm shadow-lg transition-all submit-button" ${canSubmit ? '' : 'disabled'}>
+      <button type="submit" class="w-full py-4 flex items-center justify-center gap-3 rounded-2xl font-semibold text-sm shadow-lg transition-all submit-button" disabled="disabled">
         <i data-lucide="message-circle" class="w-5 h-5"></i>
         Send via WhatsApp
       </button>
@@ -187,18 +197,27 @@ export function renderReservationCard() {
 
 function validate() {
   const nextErrors = {}
-  if (!form.name.trim()) {
-    nextErrors.name = 'Please enter your name.'
-  } else if (!namePattern.test(form.name)) {
-    nextErrors.name = 'Name can only contain letters and spaces.'
-  } else if (form.name.length > 12) {
-    nextErrors.name = 'Name must be 12 characters or fewer.'
+
+  switch (true) {
+    case !form.name.trim():
+      nextErrors.name = 'Please enter your name.'
+      break
+    case !namePattern.test(form.name):
+      nextErrors.name = 'Name can only contain letters and spaces.'
+      break
+    case form.name.length > 12:
+      nextErrors.name = 'Name must be 12 characters or fewer.'
+      break
+    default:
+      break
   }
+
   if (!form.startDate) nextErrors.startDate = 'Select an arrival date.'
   if (!form.endDate) nextErrors.endDate = 'Select a departure date.'
   if (form.startDate && form.endDate && form.endDate < form.startDate) {
     nextErrors.endDate = 'Departure cannot be before arrival.'
   }
+
   errors = nextErrors
   return Object.keys(nextErrors).length === 0
 }
@@ -206,19 +225,20 @@ function validate() {
 function updateCard(onIcons) {
   const card = document.getElementById('reservation-card')
   if (!card) return
-  card.innerHTML = sanitizeHtml(renderReservationCard())
+  card.innerHTML = renderReservationCard()
   onIcons()
   bindFormEvents(onIcons)
+  updateSubmitState()
 }
 
 function updatePreview() {
   const preview = document.getElementById('message-preview')
-  const previewText = preview?.querySelector('p:last-child')
+  const previewText = document.getElementById('message-preview-text') || preview?.querySelector('p:last-child')
   if (!preview || !previewText) return
 
   if (hasPreview()) {
     preview.classList.remove('hidden')
-    previewText.textContent = previewMessage()
+    previewText.innerHTML = sanitizeHtml(previewMessage())
   } else {
     preview.classList.add('hidden')
   }
@@ -227,7 +247,10 @@ function updatePreview() {
 function updateSubmitState() {
   const submitButton = document.querySelector('.submit-button')
   if (submitButton instanceof HTMLButtonElement) {
-    submitButton.disabled = !isFormValid()
+    const invalid = !isFormValid()
+    submitButton.disabled = invalid
+    if (invalid) submitButton.setAttribute('disabled', '')
+    else submitButton.removeAttribute('disabled')
   }
 }
 
@@ -278,18 +301,25 @@ function bindFormEvents(onIcons) {
     const target = event.target
     if (!(target instanceof HTMLInputElement)) return
 
-    if (target.name === 'name') {
-      form.name = target.value
-      updateNameState(target)
-    }
-    if (target.name === 'startDate') {
-      form.startDate = target.value
-      const endDateInput = document.getElementById('endDate')
-      if (endDateInput instanceof HTMLInputElement) {
-        endDateInput.min = form.startDate || todayIso()
+    switch (target.name) {
+      case 'name':
+        form.name = target.value
+        updateNameState(target)
+        break
+      case 'startDate': {
+        form.startDate = target.value
+        const endDateInput = document.getElementById('endDate')
+        if (endDateInput instanceof HTMLInputElement) {
+          endDateInput.min = form.startDate || todayIso()
+        }
+        break
       }
+      case 'endDate':
+        form.endDate = target.value
+        break
+      default:
+        break
     }
-    if (target.name === 'endDate') form.endDate = target.value
 
     updatePreview()
     updateSubmitState()
@@ -352,4 +382,5 @@ function bindFormEvents(onIcons) {
 
 export function initReservationForm(onIcons) {
   updateCard(onIcons)
+  updateSubmitState()
 }
