@@ -146,6 +146,7 @@ body {
 }
 .date-cell.is-disabled { color: rgba(124, 74, 45, 0.24); cursor: not-allowed; }
 .date-cell.is-in-range {
+  z-index: 0;
   background: transparent;
   color: #1c0f08;
 }
@@ -163,9 +164,9 @@ body {
 }
 
 .date-cell.is-in-range:hover::before { background: rgba(217, 119, 6, 0.9); }
-.date-cell.is-selected + .date-cell.is-in-range::before { left: -0.42rem; }
+.date-cell.is-selected + .date-cell.is-in-range::before { left: -0.42rem; z-index: -2; }
 .date-cell.is-in-range:has(+ .date-cell.is-selected)::before { right: -0.42rem; }
-.date-cell.is-selected { background: #1668c7; color: white; font-weight: 700; }
+.date-cell.is-selected { z-index: 3; background: #1668c7; color: white; font-weight: 700; }
 .date-cell.is-selected:hover { transform: scale(1.06); background: #1668c7; color: white; }
 .date-cell.is-single::before,
 .date-cell.is-single::after {
