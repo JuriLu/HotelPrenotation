@@ -130,12 +130,11 @@ body {
 
 .date-cell {
   position: relative;
-  z-index: 1;
-  min-height: 2.35rem;
-  width: 2.35rem;
+  z-index: 0;
+  width: 100%;
   height: 2.35rem;
   min-height: 0;
-  margin: 0 auto;
+  margin: 0;
   padding: 0;
   display: inline-flex;
   align-items: center;
@@ -147,35 +146,56 @@ body {
   transition: transform 140ms ease, color 140ms ease, background-color 140ms ease;
 }
 
+.date-number {
+  position: relative;
+  z-index: 2;
+  width: 2.35rem;
+  height: 2.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  transition: transform 140ms ease, color 140ms ease, background-color 140ms ease;
+}
+
 .date-cell:hover:not(:disabled):not(.is-selected) {
-  transform: scale(1.06);
-  background: rgba(124, 74, 45, 0.1);
   color: #1c0f08;
 }
+
+.date-cell:hover:not(:disabled):not(.is-selected) .date-number {
+  transform: scale(1.06);
+  background: rgba(124, 74, 45, 0.1);
+}
+
 .date-cell.is-disabled { color: rgba(124, 74, 45, 0.24); cursor: not-allowed; }
-.date-cell.is-in-range {
+.date-cell.is-in-range,
+.date-cell.is-range-start,
+.date-cell.is-range-end {
   z-index: 0;
   background: transparent;
   color: #1c0f08;
 }
 
-.date-cell.is-in-range::before {
+.date-cell.is-in-range::before,
+.date-cell.is-range-start::before,
+.date-cell.is-range-end::before {
   content: '';
   position: absolute;
-  z-index: -1;
+  z-index: 1;
   top: 0.43rem;
-  right: 0;
   bottom: 0.43rem;
   left: 0;
+  right: 0;
   background: rgba(217, 119, 6, 0.75);
   transition: background-color 140ms ease;
 }
 
-.date-cell.is-in-range:hover::before { background: rgba(217, 119, 6, 0.9); }
-.date-cell.is-selected + .date-cell.is-in-range::before { left: -0.42rem; z-index: -2; }
-.date-cell.is-in-range:has(+ .date-cell.is-selected)::before { right: -0.42rem; }
-.date-cell.is-selected { z-index: 3; background: #c90083; color: white; font-weight: 700; }
-.date-cell.is-selected:hover { transform: scale(1.06); background: #c90083; color: white; }
+.date-cell.is-range-start::before { left: 50%; }
+.date-cell.is-range-end::before { right: 50%; }
+.date-cell.is-in-range:hover::before { background: rgba(217, 119, 6, 0.85); }
+.date-cell.is-selected { z-index: 3; background: transparent; color: white; font-weight: 700; }
+.date-cell.is-selected .date-number { background: #c90083; color: white; }
+.date-cell.is-selected:hover .date-number { transform: scale(1.06); background: #c90083; color: white; }
 .date-cell.is-single::before,
 .date-cell.is-single::after {
   position: absolute;
@@ -188,7 +208,7 @@ body {
   transform: translateX(-50%);
   color: #c90083;
 }
-.date-cell.is-single { box-shadow: 0 0 0 0.13rem white, 0 0 0 0.28rem #c90083; }
+.date-cell.is-single .date-number { box-shadow: 0 0 0 0.13rem white, 0 0 0 0.28rem #c90083; }
 .date-cell.is-single::before { content: ''; top: -0.42rem; border-bottom: 0.32rem solid #c90083; }
 .date-cell.is-single::after { content: ''; bottom: -0.42rem; border-top: 0.32rem solid #c90083; }
 .date-cell.is-single::before,

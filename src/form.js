@@ -64,7 +64,9 @@ function renderCalendar() {
     const selected = value === form.startDate || value === form.endDate
     const singleDay = selected && form.startDate === form.endDate
     const inRange = form.startDate && form.endDate && value > form.startDate && value < form.endDate
-    cells.push(`<button type="button" class="date-cell${disabled ? ' is-disabled' : ''}${selected ? ' is-selected' : ''}${singleDay ? ' is-single' : ''}${inRange ? ' is-in-range' : ''}" data-date="${value}" ${disabled ? 'disabled' : ''} aria-label="${value}">${day}</button>`)
+    const rangeStart = form.startDate && form.endDate && form.startDate !== form.endDate && value === form.startDate
+    const rangeEnd = form.startDate && form.endDate && form.startDate !== form.endDate && value === form.endDate
+    cells.push(`<button type="button" class="date-cell${disabled ? ' is-disabled' : ''}${selected ? ' is-selected' : ''}${singleDay ? ' is-single' : ''}${inRange ? ' is-in-range' : ''}${rangeStart ? ' is-range-start' : ''}${rangeEnd ? ' is-range-end' : ''}" data-date="${value}" ${disabled ? 'disabled' : ''} aria-label="${value}"><span class="date-number">${day}</span></button>`)
   }
   return `
     <div class="date-picker-header">
