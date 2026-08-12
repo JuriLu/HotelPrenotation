@@ -125,7 +125,7 @@ function renderForm() {
         <div class="relative">
           <button type="button" id="date-range-toggle" aria-haspopup="dialog" aria-expanded="${datePickerOpen}" class="w-full text-left ${inputClass('startDate')} flex items-center gap-3">
             <i data-lucide="calendar-days" class="w-4 h-4 text-amber-500/60"></i>
-            <span class="flex-1 text-sm text-amber-950">${form.startDate && form.endDate ? `${fmtDate(form.startDate)} — ${fmtDate(form.endDate)}` : 'Select arrival and departure'}</span>
+            <span class="flex-1 text-sm text-amber-950">${form.startDate && form.endDate ? `${fmtDate(form.startDate)} — ${fmtDate(form.endDate)}` : 'Select dates'}</span>
             <span class="text-amber-500 text-xs uppercase tracking-[0.16em]">Choose</span>
           </button>
 
@@ -144,7 +144,7 @@ function renderForm() {
         </div>
       </div>
 
-      <button type="submit" class="w-full py-4 flex items-center justify-center gap-3 rounded-2xl font-semibold text-white text-sm shadow-lg shadow-amber-800/20 transition-all submit-button">
+      <button type="submit" class="w-full py-4 flex items-center justify-center gap-3 rounded-2xl font-semibold text-sm shadow-lg transition-all submit-button">
         <i data-lucide="message-circle" class="w-5 h-5"></i>
         Send via WhatsApp
       </button>
