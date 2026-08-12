@@ -89,7 +89,7 @@ export function renderReservationSection() {
             <div class="w-7 h-7 rounded-full bg-[#25D366] flex items-center justify-center">
               <i data-lucide="message-circle" class="w-3.5 h-3.5 text-white"></i>
             </div>
-            <span class="text-sm text-amber-700/65 font-medium">We respond via WhatsApp Business</span>
+            <span class="text-sm text-amber-700/65 font-medium">We respond via WhatsApp</span>
           </div>
         </div>
         <div id="reservation-card" class="reservation-card rounded-3xl p-8 md:p-10"></div>

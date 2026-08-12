@@ -11,6 +11,10 @@ const defaultForm = {
 let form = { ...defaultForm }
 let errors = {}
 let submitted = false
+let datePickerOpen = false
+let datePickerClosing = false
+let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+let closeCalendarTimer
 
 function inputClass(key) {
   const base =
@@ -20,12 +24,58 @@ function inputClass(key) {
     : `${base} border-amber-200 focus:border-amber-400`
 }
 
+const namePattern = /^[A-Za-zÀ-ÖØ-öø-ÿ ]+$/
+
+function sanitizeName(value) {
+  return value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ ]+/g, '').slice(0, 12)
+}
+
 function hasPreview() {
-  return form.name && form.startDate && form.endDate && form.endDate > form.startDate
+  return form.name && form.startDate && form.endDate && form.endDate >= form.startDate
+}
+
+function reservationMessage() {
+  return `Hello, my name is ${form.name} and I would like to request a reservation for ${form.guests} ${form.guests > 1 ? 'people' : 'person'} from ${fmtDate(form.startDate)} to ${fmtDate(form.endDate)}. Could you please show me the available rooms and pricing? Thank you!`
 }
 
 function previewMessage() {
-  return `"Hello, my name is <strong class="not-italic text-amber-950">${form.name}</strong> and I request a reservation for <strong class="not-italic text-amber-950">${form.guests}</strong> people for <strong class="not-italic text-amber-950">${fmtDate(form.startDate)}</strong> untill <strong class="not-italic text-amber-950">${fmtDate(form.endDate)}</strong>. Can you please show me the rooms available and the price please? Thank you!"`
+  return `"Hello, my name is <strong class="not-italic text-amber-950">${form.name}</strong> and I would like to request a reservation for <strong class="not-italic text-amber-950">${form.guests}</strong> ${form.guests > 1 ? 'people' : 'person'} from <strong class="not-italic text-amber-950">${fmtDate(form.startDate)}</strong> to <strong class="not-italic text-amber-950">${fmtDate(form.endDate)}</strong>. Could you please show me the available rooms and pricing? Thank you!"`
+}
+
+function isoFromParts(year, month, day) {
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+function calendarTitle() {
+  return calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+}
+
+function renderCalendar() {
+  const year = calendarMonth.getFullYear()
+  const month = calendarMonth.getMonth()
+  const firstDay = new Date(year, month, 1).getDay()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const today = todayIso()
+  const cells = []
+  for (let i = 0; i < firstDay; i += 1) cells.push('<span class="date-empty" aria-hidden="true"></span>')
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const value = isoFromParts(year, month, day)
+    const disabled = value < today || (form.startDate && !form.endDate && value < form.startDate)
+    const selected = value === form.startDate || value === form.endDate
+    const singleDay = selected && form.startDate === form.endDate
+    const inRange = form.startDate && form.endDate && value > form.startDate && value < form.endDate
+    cells.push(`<button type="button" class="date-cell${disabled ? ' is-disabled' : ''}${selected ? ' is-selected' : ''}${singleDay ? ' is-single' : ''}${inRange ? ' is-in-range' : ''}" data-date="${value}" ${disabled ? 'disabled' : ''} aria-label="${value}">${day}</button>`)
+  }
+  return `
+    <div class="date-picker-header">
+      <button type="button" id="calendar-prev" class="date-nav" aria-label="Previous month" ${year === new Date().getFullYear() && month === new Date().getMonth() ? 'disabled' : ''}>‹</button>
+      <p class="date-month">${calendarTitle()}</p>
+      <button type="button" id="calendar-next" class="date-nav" aria-label="Next month">›</button>
+    </div>
+    <div class="date-weekdays" aria-hidden="true">${['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => `<span>${day}</span>`).join('')}</div>
+    <div class="date-grid">${cells.join('')}</div>
+    <p class="date-picker-hint">${form.startDate && !form.endDate ? 'Now select your departure date.' : 'Select your arrival and departure dates.'}</p>
+  `
 }
 
 function renderSuccess() {
@@ -51,7 +101,7 @@ function renderForm() {
         <label for="name" class="block text-xs font-semibold text-amber-700/65 uppercase tracking-wider mb-1.5">Full Name</label>
         <div class="relative">
           <i data-lucide="user" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500/60 pointer-events-none"></i>
-          <input id="name" name="name" type="text" placeholder="Emma Thornton" value="${form.name}" class="${inputClass('name')}" />
+          <input id="name" name="name" type="text" placeholder="Emma Thornton" value="${form.name}" maxlength="12" autocomplete="name" inputmode="text" class="${inputClass('name')}" />
         </div>
         ${errors.name ? `<p class="text-xs text-rose-500 mt-1">${errors.name}</p>` : ''}
       </div>
@@ -68,23 +118,19 @@ function renderForm() {
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label for="startDate" class="block text-xs font-semibold text-amber-700/65 uppercase tracking-wider mb-1.5">Arrival</label>
-          <div class="relative">
-            <i data-lucide="calendar-days" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500/60 pointer-events-none"></i>
-            <input id="startDate" name="startDate" type="date" min="${todayIso()}" value="${form.startDate}" class="${inputClass('startDate')}" />
-          </div>
-          ${errors.startDate ? `<p class="text-xs text-rose-500 mt-1">${errors.startDate}</p>` : ''}
+      <div>
+        <label for="date-range-toggle" class="block text-xs font-semibold text-amber-700/65 uppercase tracking-wider mb-1.5">Stay dates</label>
+        <div class="relative">
+          <button type="button" id="date-range-toggle" aria-haspopup="dialog" aria-expanded="${datePickerOpen}" class="w-full text-left ${inputClass('startDate')} flex items-center gap-3">
+            <i data-lucide="calendar-days" class="w-4 h-4 text-amber-500/60"></i>
+            <span class="flex-1 text-sm text-amber-950">${form.startDate && form.endDate ? `${fmtDate(form.startDate)} — ${fmtDate(form.endDate)}` : 'Select arrival and departure'}</span>
+            <span class="text-amber-500 text-xs uppercase tracking-[0.16em]">Choose</span>
+          </button>
+
+          ${(datePickerOpen || datePickerClosing) ? `<div id="date-range-panel" role="dialog" aria-label="Choose stay dates" class="date-picker-panel mt-3 rounded-2xl border border-amber-200 bg-white/95 shadow-lg p-4${datePickerClosing ? ' is-closing' : ''}">${renderCalendar()}</div>` : ''}
         </div>
-        <div>
-          <label for="endDate" class="block text-xs font-semibold text-amber-700/65 uppercase tracking-wider mb-1.5">Departure</label>
-          <div class="relative">
-            <i data-lucide="calendar-days" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500/60 pointer-events-none"></i>
-            <input id="endDate" name="endDate" type="date" min="${form.startDate || todayIso()}" value="${form.endDate}" class="${inputClass('endDate')}" />
-          </div>
-          ${errors.endDate ? `<p class="text-xs text-rose-500 mt-1">${errors.endDate}</p>` : ''}
-        </div>
+        ${errors.startDate ? `<p class="text-xs text-rose-500 mt-1">${errors.startDate}</p>` : ''}
+        ${errors.endDate ? `<p class="text-xs text-rose-500 mt-1">${errors.endDate}</p>` : ''}
       </div>
 
       <div id="message-preview" class="${hasPreview() ? '' : 'hidden'}">
@@ -114,11 +160,17 @@ export function renderReservationCard() {
 
 function validate() {
   const nextErrors = {}
-  if (!form.name.trim()) nextErrors.name = 'Please enter your name.'
+  if (!form.name.trim()) {
+    nextErrors.name = 'Please enter your name.'
+  } else if (!namePattern.test(form.name)) {
+    nextErrors.name = 'Name can only contain letters and spaces.'
+  } else if (form.name.length > 12) {
+    nextErrors.name = 'Name must be 12 characters or fewer.'
+  }
   if (!form.startDate) nextErrors.startDate = 'Select an arrival date.'
   if (!form.endDate) nextErrors.endDate = 'Select a departure date.'
-  if (form.startDate && form.endDate && form.endDate <= form.startDate) {
-    nextErrors.endDate = 'Departure must be after arrival.'
+  if (form.startDate && form.endDate && form.endDate < form.startDate) {
+    nextErrors.endDate = 'Departure cannot be before arrival.'
   }
   errors = nextErrors
   return Object.keys(nextErrors).length === 0
@@ -163,7 +215,7 @@ function bindFormEvents(onIcons) {
       return
     }
 
-    const message = `Hello, my name is ${form.name} and i request a reservation for ${form.guests} people for ${fmtDate(form.startDate)} untill ${fmtDate(form.endDate)}. Can you please show me the rooms available and the price please? Thank you!`
+    const message = reservationMessage()
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`, '_blank')
     submitted = true
     updateCard(onIcons)
@@ -173,7 +225,10 @@ function bindFormEvents(onIcons) {
     const target = event.target
     if (!(target instanceof HTMLInputElement)) return
 
-    if (target.name === 'name') form.name = target.value
+    if (target.name === 'name') {
+      form.name = sanitizeName(target.value)
+      if (target.value !== form.name) target.value = form.name
+    }
     if (target.name === 'startDate') {
       form.startDate = target.value
       const endDateInput = document.getElementById('endDate')
@@ -186,6 +241,44 @@ function bindFormEvents(onIcons) {
     delete errors[target.name]
     updatePreview()
   })
+
+  document.getElementById('date-range-toggle')?.addEventListener('click', () => {
+    clearTimeout(closeCalendarTimer)
+    datePickerClosing = false
+    datePickerOpen = !datePickerOpen
+    if (datePickerOpen) calendarMonth = new Date((form.startDate || todayIso()).slice(0, 7) + '-01T00:00:00')
+    updateCard(onIcons)
+  })
+
+  document.getElementById('calendar-prev')?.addEventListener('click', () => {
+    const current = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+    if (calendarMonth > current) { calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1); updateCard(onIcons) }
+  })
+  document.getElementById('calendar-next')?.addEventListener('click', () => {
+    calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1)
+    updateCard(onIcons)
+  })
+  document.querySelectorAll('[data-date]').forEach((button) => button.addEventListener('click', () => {
+    const value = button.dataset.date
+    if (!form.startDate || (form.startDate && form.endDate)) {
+      form.startDate = value; form.endDate = ''; errors = {}
+      updateCard(onIcons)
+      return
+    } else if (value >= form.startDate) {
+      form.endDate = value; errors = {}
+      updateCard(onIcons)
+      clearTimeout(closeCalendarTimer)
+      closeCalendarTimer = setTimeout(() => {
+        datePickerClosing = true
+        updateCard(onIcons)
+        closeCalendarTimer = setTimeout(() => {
+          datePickerOpen = false
+          datePickerClosing = false
+          updateCard(onIcons)
+        }, 220)
+      }, 650)
+    }
+  }))
 
   document.getElementById('guests-decrease')?.addEventListener('click', () => {
     form.guests = Math.max(1, form.guests - 1)
