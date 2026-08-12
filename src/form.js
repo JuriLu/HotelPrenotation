@@ -1,5 +1,5 @@
 import { getWhatsAppNumber } from './data.js'
-import { buildWhatsAppUrl, fmtDate, sanitizeHtml, todayIso } from './utils.js'
+import { buildWhatsAppUrl, fmtDate, sanitizeHtml, sanitizeText, todayIso } from './utils.js'
 
 const defaultForm = {
   name: '',
@@ -24,18 +24,37 @@ function inputClass(key) {
     : `${base} border-amber-200 focus:border-amber-400`
 }
 
-const namePattern = /^[A-Za-zÀ-ÖØ-öø-ÿ ]+$/
+const namePattern = /^[\p{L} ]+$/u
 
-function sanitizeName(value) {
-  return value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ ]+/g, '').slice(0, 12)
+function nameError(value) {
+  if (!value.trim()) return 'Please enter your name.'
+  if (value.length > 12) return 'Name must be 12 characters or fewer.'
+  if (!namePattern.test(value)) return 'Name can only contain letters and spaces.'
+  return ''
+}
+
+function getValidationErrors() {
+  const nextErrors = {}
+  const nextNameError = nameError(form.name)
+  if (nextNameError) nextErrors.name = nextNameError
+  if (!form.startDate) nextErrors.startDate = 'Select an arrival date.'
+  if (!form.endDate) nextErrors.endDate = 'Select a departure date.'
+  if (form.startDate && form.endDate && form.endDate < form.startDate) {
+    nextErrors.endDate = 'Departure cannot be before arrival.'
+  }
+  return nextErrors
+}
+
+function isFormValid() {
+  return Object.keys(getValidationErrors()).length === 0
 }
 
 function hasPreview() {
-  return form.name && form.startDate && form.endDate && form.endDate >= form.startDate
+  return isFormValid()
 }
 
 function reservationMessage() {
-  return `Hello, my name is ${form.name} and I would like to request a reservation for ${form.guests} ${form.guests > 1 ? 'people' : 'person'} from ${fmtDate(form.startDate)} to ${fmtDate(form.endDate)}. Could you please show me the available rooms and pricing? Thank you!`
+  return `Hello, my name is ${sanitizeText(form.name)} and I would like to request a reservation for ${form.guests} ${form.guests > 1 ? 'people' : 'person'} from ${fmtDate(form.startDate)} to ${fmtDate(form.endDate)}. Could you please show me the available rooms and pricing? Thank you!`
 }
 
 function previewMessage() {
@@ -97,6 +116,7 @@ function renderSuccess() {
 }
 
 function renderForm() {
+  const canSubmit = isFormValid()
   const dateRangeLabel =
     form.startDate && form.endDate
       ? `${fmtDate(form.startDate)} — ${fmtDate(form.endDate)}`
@@ -108,9 +128,9 @@ function renderForm() {
         <label for="name" class="block text-xs font-semibold text-amber-700/65 uppercase tracking-wider mb-1.5">Full Name</label>
         <div class="relative">
           <i data-lucide="user" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500/60 pointer-events-none"></i>
-          <input id="name" name="name" type="text" placeholder="Emma Thornton" value="${form.name}" maxlength="12" autocomplete="name" inputmode="text" class="${inputClass('name')}" />
+          <input id="name" name="name" type="text" placeholder="Emma Thornton" value="${form.name}" autocomplete="name" inputmode="text" aria-invalid="${errors.name ? 'true' : 'false'}" aria-describedby="name-error" class="${inputClass('name')}" />
         </div>
-        ${errors.name ? `<p class="text-xs text-rose-500 mt-1">${errors.name}</p>` : ''}
+        <p id="name-error" class="text-xs text-rose-500 mt-1${errors.name ? '' : ' hidden'}">${errors.name || ''}</p>
       </div>
 
       <div>
@@ -149,7 +169,7 @@ function renderForm() {
         </div>
       </div>
 
-      <button type="submit" class="w-full py-4 flex items-center justify-center gap-3 rounded-2xl font-semibold text-sm shadow-lg transition-all submit-button">
+      <button type="submit" class="w-full py-4 flex items-center justify-center gap-3 rounded-2xl font-semibold text-sm shadow-lg transition-all submit-button" ${canSubmit ? '' : 'disabled'}>
         <i data-lucide="message-circle" class="w-5 h-5"></i>
         Send via WhatsApp
       </button>
@@ -204,6 +224,31 @@ function updatePreview() {
   }
 }
 
+function updateSubmitState() {
+  const submitButton = document.querySelector('.submit-button')
+  if (submitButton instanceof HTMLButtonElement) {
+    submitButton.disabled = !isFormValid()
+  }
+}
+
+function updateNameState(input) {
+  const nextNameError = nameError(form.name)
+  if (nextNameError) {
+    errors.name = nextNameError
+  } else {
+    delete errors.name
+  }
+
+  input.className = inputClass('name')
+  input.setAttribute('aria-invalid', nextNameError ? 'true' : 'false')
+
+  const errorText = document.getElementById('name-error')
+  if (errorText) {
+    errorText.textContent = nextNameError
+    errorText.classList.toggle('hidden', !nextNameError)
+  }
+}
+
 function bindFormEvents(onIcons) {
   const reservationForm = document.getElementById('reservation-form')
   const resetButton = document.getElementById('reset-form')
@@ -234,8 +279,8 @@ function bindFormEvents(onIcons) {
     if (!(target instanceof HTMLInputElement)) return
 
     if (target.name === 'name') {
-      form.name = sanitizeName(target.value)
-      if (target.value !== form.name) target.value = form.name
+      form.name = target.value
+      updateNameState(target)
     }
     if (target.name === 'startDate') {
       form.startDate = target.value
@@ -246,8 +291,8 @@ function bindFormEvents(onIcons) {
     }
     if (target.name === 'endDate') form.endDate = target.value
 
-    delete errors[target.name]
     updatePreview()
+    updateSubmitState()
   })
 
   document.getElementById('date-range-toggle')?.addEventListener('click', () => {
@@ -293,6 +338,7 @@ function bindFormEvents(onIcons) {
     const label = document.getElementById('guests-label')
     if (label) label.textContent = `${form.guests} guest${form.guests > 1 ? 's' : ''}`
     updatePreview()
+    updateSubmitState()
   })
 
   document.getElementById('guests-increase')?.addEventListener('click', () => {
@@ -300,6 +346,7 @@ function bindFormEvents(onIcons) {
     const label = document.getElementById('guests-label')
     if (label) label.textContent = `${form.guests} guest${form.guests > 1 ? 's' : ''}`
     updatePreview()
+    updateSubmitState()
   })
 }
 

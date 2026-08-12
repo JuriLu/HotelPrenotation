@@ -4,6 +4,10 @@ export function sanitizeHtml(html) {
   return DOMPurify.sanitize(html)
 }
 
+export function sanitizeText(value) {
+  return DOMPurify.sanitize(String(value), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
+}
+
 export function fmtDate(value) {
   if (!value) return ''
   const [year, month, day] = value.split('-').map(Number)
