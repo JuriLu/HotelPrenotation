@@ -123,7 +123,7 @@ function renderForm() {
       <div>
         <label for="date-range-toggle" class="block text-xs font-semibold text-amber-700/65 uppercase tracking-wider mb-1.5">Stay dates</label>
         <div class="relative">
-          <button type="button" id="date-range-toggle" aria-haspopup="dialog" aria-expanded="${datePickerOpen}" class="w-full text-left ${inputClass('startDate')} flex items-center gap-3">
+          <button type="button" id="date-range-toggle" aria-haspopup="dialog" aria-expanded="${datePickerOpen}" class="w-full text-left ${inputClass('startDate')} flex items-center gap-2 date-range-toggle">
             <i data-lucide="calendar-days" class="w-4 h-4 text-amber-500/60"></i>
             <span class="flex-1 text-sm text-amber-950">${form.startDate && form.endDate ? `${fmtDate(form.startDate)} — ${fmtDate(form.endDate)}` : 'Select dates'}</span>
             <span class="text-amber-500 text-xs uppercase tracking-[0.16em]">Choose</span>
