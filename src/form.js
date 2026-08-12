@@ -1,5 +1,5 @@
-import { WA_NUMBER } from './data.js'
-import { fmtDate, todayIso } from './utils.js'
+import { getWhatsAppNumber } from './data.js'
+import { buildWhatsAppUrl, fmtDate, sanitizeHtml, todayIso } from './utils.js'
 
 const defaultForm = {
   name: '',
@@ -39,7 +39,7 @@ function reservationMessage() {
 }
 
 function previewMessage() {
-  return `"Hello, my name is <strong class="not-italic text-amber-950">${form.name}</strong> and I would like to request a reservation for <strong class="not-italic text-amber-950">${form.guests}</strong> ${form.guests > 1 ? 'people' : 'person'} from <strong class="not-italic text-amber-950">${fmtDate(form.startDate)}</strong> to <strong class="not-italic text-amber-950">${fmtDate(form.endDate)}</strong>. Could you please show me the available rooms and pricing? Thank you!"`
+  return `"${reservationMessage()}"`
 }
 
 function isoFromParts(year, month, day) {
@@ -97,6 +97,11 @@ function renderSuccess() {
 }
 
 function renderForm() {
+  const dateRangeLabel =
+    form.startDate && form.endDate
+      ? `${fmtDate(form.startDate)} — ${fmtDate(form.endDate)}`
+      : 'Select dates'
+
   return `
     <form id="reservation-form" class="space-y-5" novalidate>
       <div>
@@ -125,7 +130,7 @@ function renderForm() {
         <div class="relative">
           <button type="button" id="date-range-toggle" aria-haspopup="dialog" aria-expanded="${datePickerOpen}" class="w-full text-left ${inputClass('startDate')} flex items-center gap-2 date-range-toggle">
             <i data-lucide="calendar-days" class="w-4 h-4 text-amber-500/60"></i>
-            <span class="flex-1 text-sm text-amber-950">${form.startDate && form.endDate ? `${fmtDate(form.startDate)} — ${fmtDate(form.endDate)}` : 'Select dates'}</span>
+            <span class="flex-1 text-sm text-amber-950">${dateRangeLabel}</span>
             <span class="text-amber-500 text-xs uppercase tracking-[0.16em]">Choose</span>
           </button>
 
@@ -181,7 +186,7 @@ function validate() {
 function updateCard(onIcons) {
   const card = document.getElementById('reservation-card')
   if (!card) return
-  card.innerHTML = renderReservationCard()
+  card.innerHTML = sanitizeHtml(renderReservationCard())
   onIcons()
   bindFormEvents(onIcons)
 }
@@ -193,7 +198,7 @@ function updatePreview() {
 
   if (hasPreview()) {
     preview.classList.remove('hidden')
-    previewText.innerHTML = previewMessage()
+    previewText.textContent = previewMessage()
   } else {
     preview.classList.add('hidden')
   }
@@ -218,7 +223,8 @@ function bindFormEvents(onIcons) {
     }
 
     const message = reservationMessage()
-    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`, '_blank')
+    const whatsappWindow = window.open(buildWhatsAppUrl(getWhatsAppNumber(), message), '_blank', 'noopener,noreferrer')
+    if (whatsappWindow) whatsappWindow.opener = null
     submitted = true
     updateCard(onIcons)
   })

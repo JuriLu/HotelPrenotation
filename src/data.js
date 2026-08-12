@@ -1,4 +1,9 @@
-export const WA_NUMBER = '+355698626849'
+const WA_COUNTRY_CODE = '355'
+const WA_LOCAL_SEGMENTS = ['69', '862', '6849']
+
+export function getWhatsAppNumber() {
+  return `${WA_COUNTRY_CODE}${WA_LOCAL_SEGMENTS.join('')}`
+}
 
 export const ROOMS = [
   {

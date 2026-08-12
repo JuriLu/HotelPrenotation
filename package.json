@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "dompurify": "^3.4.13",
     "lucide": "^1.30.0",
     "tailwindcss": "^4.3.3"
   }

@@ -2,6 +2,7 @@ import './style.css'
 import { createIcons, icons } from 'lucide'
 import { renderPage } from './render.js'
 import { initReservationForm } from './form.js'
+import { sanitizeHtml } from './utils.js'
 
 function refreshIcons() {
   createIcons({ icons, attrs: { 'stroke-width': 1.75 } })
@@ -28,7 +29,7 @@ function initRevealAnimations() {
 }
 
 const app = document.querySelector('#app')
-app.innerHTML = renderPage()
+app.innerHTML = sanitizeHtml(renderPage())
 initReservationForm(refreshIcons)
 refreshIcons()
 initRevealAnimations()
